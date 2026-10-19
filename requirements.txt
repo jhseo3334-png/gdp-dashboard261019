@@ -1,2 +1,1 @@
 streamlit>=1.66,<2
-openai>=2,<3
