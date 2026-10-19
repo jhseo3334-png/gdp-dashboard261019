@@ -4,7 +4,7 @@ import unicodedata
 
 import streamlit as st
 
-st.set_page_config(page_title="5형식 문장 정복", page_icon="🧩", layout="wide")
+st.set_page_config(page_title="5형식 문장 어렵지 않아요", page_icon="🧩", layout="wide")
 
 # 글꼴을 불러오지 못하는 환경에서는 기기의 기본 한글 글꼴을 사용합니다.
 st.markdown("""
@@ -277,6 +277,11 @@ def answer_question(question, activity_key):
         if keyword in q or re.search(rf"(?<![a-z]){role.lower()}(?![a-z])", q):
             return explanation
     if any(word in compact for word in ("모르", "어려", "막혔", "힌트", "도와", "왜", "틀렸", "맞아", "맞나요", "빈칸", "부족", "예시", "예제", "형식", "문장")):
+        if activity_key == "practice":
+            level = st.session_state.get("practice_level", 1)
+            number = st.session_state.get(f"practice_number_{level}", 1)
+            prompt, instruction, choices, correct, explanation = PRACTICE[level]["questions"][number - 1]
+            return f"현재는 LEVEL {level}의 {number}번 문제예요. **{prompt}**\n\n{instruction}\n\n먼저 누가(S), 무엇을 하거나 어떤 상태인지(V)를 찾아보세요. 빈칸 문제는 한국어 뜻을, 형식 문제는 O와 C의 역할을 확인해 보세요."
         if activity_key == "cards":
             activity = st.session_state.get("card_activity", "새들의 노래 · 1형식")
             card_words, roles = activities[activity]
@@ -404,7 +409,97 @@ def remove_block(index):
     st.session_state.pop(f"word_{block['id']}", None)
 
 
-st.title("5형식 문장 정복")
+# LEVEL은 형식 번호가 아니라 학습 난이도입니다. 각 레벨에 5문제가 있습니다.
+PRACTICE = {
+    1: {"title": "성분 찾기", "description": "누가, 무엇을 하는지부터 찾아봐요!", "questions": [
+        ("Birds sing.", "Birds의 문장 성분은 무엇일까요?", ["S · 주어", "V · 동사", "O · 목적어", "C · 보어"], "S · 주어", "노래하는 주체인 Birds가 주어(S)예요."),
+        ("Students read books.", "read의 문장 성분은 무엇일까요?", ["S · 주어", "V · 동사", "O · 목적어", "C · 보어"], "V · 동사", "read는 ‘읽다’라는 동작을 나타내는 동사(V)예요."),
+        ("I like music.", "music의 문장 성분은 무엇일까요?", ["S · 주어", "V · 동사", "O · 목적어", "C · 보어"], "O · 목적어", "무엇을 좋아하는지 알려 주는 music이 목적어(O)예요."),
+        ("She is happy.", "happy의 문장 성분은 무엇일까요?", ["S · 주어", "V · 동사", "O · 목적어", "C · 보어"], "C · 보어", "happy는 주어 She의 상태를 설명하는 보어(C)예요."),
+        ("We made him happy.", "him의 문장 성분은 무엇일까요?", ["S · 주어", "V · 동사", "O · 목적어", "C · 보어"], "O · 목적어", "행복하게 만든 대상인 him이 목적어(O)이고, happy는 그 상태를 설명해요."),
+    ]},
+    2: {"title": "빈칸 채우기", "description": "뜻과 성분에 맞는 단어를 골라요!", "questions": [
+        ("___ sing. (새들이 노래해요.)", "주어 자리에 알맞은 단어는?", ["Birds", "Happy", "Read", "Gave"], "Birds", "Birds는 ‘새들’이라는 명사로, 노래하는 주어가 돼요."),
+        ("She ___ happy. (그녀는 행복해요.)", "현재의 상태를 나타내는 동사는?", ["are", "is", "am", "like"], "is", "주어 She에는 be동사 is를 써요. happy는 상태를 설명하는 보어예요."),
+        ("Students read ___. (학생들이 책을 읽어요.)", "목적어 자리에 알맞은 단어는?", ["happy", "sing", "books", "are"], "books", "읽는 대상인 books가 목적어예요. S + V + O인 3형식이에요."),
+        ("He gave ___ a book. (그는 나에게 책을 주었어요.)", "‘나에게’에 해당하는 말은?", ["I", "my", "me", "mine"], "me", "동사 뒤에서 ‘나에게’를 나타내는 목적격 me를 써요. me와 a book은 두 목적어예요."),
+        ("We made him ___. (우리는 그를 행복하게 했어요.)", "목적어의 상태를 설명할 말은?", ["happily", "happy", "happiness", "happier than"], "happy", "형용사 happy가 him의 상태를 설명하는 목적격 보어예요."),
+    ]},
+    3: {"title": "문장 형식 찾기", "description": "문장의 뼈대를 보고 1~5형식을 구별해요!", "questions": [
+        ("Dogs run.", "이 문장은 몇 형식일까요?", ["1형식", "2형식", "3형식", "4형식", "5형식"], "1형식", "Dogs(S) + run(V). 주어와 동사만으로 뜻이 완성되는 1형식이에요."),
+        ("He became a teacher.", "이 문장은 몇 형식일까요?", ["1형식", "2형식", "3형식", "4형식", "5형식"], "2형식", "He(S) + became(V) + a teacher(C). a teacher가 주어의 정체를 설명해요."),
+        ("I enjoy music.", "이 문장은 몇 형식일까요?", ["1형식", "2형식", "3형식", "4형식", "5형식"], "3형식", "I(S) + enjoy(V) + music(O). music은 즐기는 대상이에요."),
+        ("She gave him a flower.", "이 문장은 몇 형식일까요?", ["1형식", "2형식", "3형식", "4형식", "5형식"], "4형식", "She(S) + gave(V) + him(O) + a flower(O). 누구에게 무엇을 주는지 나타내요."),
+        ("They made me happy.", "이 문장은 몇 형식일까요?", ["1형식", "2형식", "3형식", "4형식", "5형식"], "5형식", "They(S) + made(V) + me(O) + happy(C). happy는 me의 상태를 설명해요."),
+    ]},
+    4: {"title": "헷갈리는 구조 비교", "description": "목적어와 보어의 차이를 살펴봐요!", "questions": [
+        ("He gave me a book.", "마지막 두 성분의 관계는?", ["O + O · 서로 다른 두 대상", "O + C · 목적어의 상태 설명"], "O + O · 서로 다른 두 대상", "me는 받는 사람, a book은 주는 물건이에요. 따라서 4형식이에요."),
+        ("We made him happy.", "마지막 두 성분의 관계는?", ["O + O · 서로 다른 두 대상", "O + C · 목적어의 상태 설명"], "O + C · 목적어의 상태 설명", "happy는 him이 어떤 상태인지 설명해요. 따라서 5형식이에요."),
+        ("She is a teacher. / She likes a teacher.", "두 문장의 a teacher는 각각 어떤 성분일까요?", ["둘 다 O", "둘 다 C", "첫 문장 C, 둘째 문장 O", "첫 문장 O, 둘째 문장 C"], "첫 문장 C, 둘째 문장 O", "is 뒤에서는 주어의 정체를 설명하고, likes 뒤에서는 좋아하는 대상을 나타내요."),
+        ("Students read. / Students read books.", "두 문장에 대한 설명으로 알맞은 것은?", ["첫 문장은 무조건 틀리다", "둘 다 가능하며, 둘째 문장은 읽는 대상을 구체화한다", "둘 다 2형식이다"], "둘 다 가능하며, 둘째 문장은 읽는 대상을 구체화한다", "read는 목적어 없이도 쓸 수 있어요. books를 더하면 1형식에서 3형식으로 바뀌어요."),
+        ("They named the baby Mina.", "Mina는 어떤 성분일까요?", ["간접 목적어", "직접 목적어", "목적격 보어"], "목적격 보어", "Mina는 the baby에게 붙인 이름으로 목적어의 정체를 설명해요. S + V + O + C예요."),
+    ]},
+    5: {"title": "직접 문장 완성", "description": "주어진 단어·구를 모두 한 번씩 써서 문장을 완성해요!", "questions": [
+        ("sing / Birds", "‘새들이 노래해요.’를 영어로 쓰세요.", None, "Birds sing.", "Birds(S) + sing(V), 1형식이에요."),
+        ("happy / is / She", "‘그녀는 행복해요.’를 영어로 쓰세요.", None, "She is happy.", "She(S) + is(V) + happy(C), 2형식이에요."),
+        ("books / read / Students", "‘학생들이 책을 읽어요.’를 영어로 쓰세요.", None, "Students read books.", "Students(S) + read(V) + books(O), 3형식이에요."),
+        ("a book / me / gave / He", "‘그는 나에게 책 한 권을 주었어요.’를 영어로 쓰세요.", None, "He gave me a book.", "He(S) + gave(V) + me(O) + a book(O), 4형식이에요."),
+        ("him / happy / We / made", "‘우리는 그를 행복하게 했어요.’를 영어로 쓰세요.", None, "We made him happy.", "We(S) + made(V) + him(O) + happy(C), 5형식이에요."),
+    ]},
+}
+
+
+def normalize_practice_answer(value):
+    # 대소문자, 연속 공백, 문장 끝 마침표 등은 정오답에 영향을 주지 않습니다.
+    value = unicodedata.normalize("NFKC", value).strip().casefold()
+    return " ".join(value.rstrip(".!? ").split())
+
+
+def render_practice():
+    activity_heading("🌈 차근차근 연습하기", "practice")
+    st.write("레벨과 문제 번호를 고르고 도전해 보세요. 틀려도 괜찮아요, 다시 하면 되니까요! 🐣")
+    level_column, question_column = st.columns(2)
+    level = level_column.selectbox("레벨 선택", list(PRACTICE), format_func=lambda n: f"LEVEL {n} · {PRACTICE[n]['title']}", key="practice_level")
+    question_number = question_column.selectbox("문제 번호", range(1, len(PRACTICE[level]["questions"]) + 1), format_func=lambda n: f"{n}번 문제", key=f"practice_number_{level}")
+    st.caption(PRACTICE[level]["description"])
+    prompt, instruction, choices, correct, explanation = PRACTICE[level]["questions"][question_number - 1]
+    problem_id = f"{level}_{question_number}"
+    results = st.session_state.setdefault("practice_results", {})
+    solved = sum(result["correct"] for result in results.values())
+    total = sum(len(info["questions"]) for info in PRACTICE.values())
+    st.progress(solved / total, text=f"🌱 정답으로 완성한 문제 {solved} / {total}")
+    with st.container(border=True):
+        st.markdown(f"### 🐾 LEVEL {level} · {question_number}번")
+        st.markdown("**" + prompt + "**")
+        st.write(instruction)
+        with st.form(f"practice_form_{problem_id}"):
+            if choices is None:
+                answer = st.text_input("영어 문장 입력", placeholder="주어진 단어를 순서대로 써 보세요", key=f"practice_answer_{problem_id}", max_chars=200)
+                st.caption("주어진 단어를 모두 사용하세요. 대소문자·여러 칸의 공백·끝의 마침표는 채점에 영향을 주지 않아요.")
+            else:
+                answer = st.radio("답을 골라 주세요", choices, index=None, key=f"practice_answer_{problem_id}")
+            submitted = st.form_submit_button("답 제출하기 🐥")
+        if submitted:
+            if answer is None or not answer.strip():
+                st.warning("🐣 아직 답이 비어 있어요. 답을 고르거나 적은 뒤 함께 도전해 봐요!")
+            else:
+                is_correct = normalize_practice_answer(answer) == normalize_practice_answer(correct)
+                results[problem_id] = {"answer": answer, "correct": is_correct}
+                st.rerun()
+        if problem_id in results:
+            result = results[problem_id]
+            st.write("**제출한 답:** " + result["answer"])
+            if result["correct"]:
+                st.success("🎉 딩동댕! 정답이에요! 한 걸음 더 성장했어요. 정말 잘했어요! 🐥✨")
+            else:
+                st.warning("🌷 아깝지만 아직 정답은 아니에요! 도전한 너, 멋져요. 설명을 보고 한 번 더 해 봐요! 💪🐣")
+                st.write("**정답:** " + correct)
+            st.info("💡 " + explanation)
+            st.caption("답을 바꾸었다면 ‘답 제출하기’를 다시 눌러 주세요. 위 결과는 마지막으로 제출한 답의 결과예요.")
+    st.caption("연습 결과는 현재 접속 세션에서만 유지돼요. LEVEL은 난이도를 뜻하며 문장 형식 번호와는 달라요.")
+
+
+st.title("5형식 문장 어렵지 않아요")
 st.markdown('<div class="mascot"><span style="font-size:2rem" aria-hidden="true">🐣 🌱 🧩</span><br><b>삐약 선생님과 한 문장씩, 차근차근!</b><br>틀려도 괜찮아요. 헷갈리는 순간에는 활동 옆 ‘도와줘’를 눌러 보세요.</div>', unsafe_allow_html=True)
 st.write("성분 블록을 고르고, 단어를 넣고, 순서를 바꾸며 영어 문장의 뼈대를 살펴보세요.")
 st.caption("① 블록 추가 → ② 단어 또는 구 입력 → ③ ↑ ↓로 순서 변경 → ④ 형식 확인")
@@ -420,110 +515,115 @@ with st.sidebar:
         st.write(f"**{role}** — {meaning}")
     st.info("4형식에는 O 블록이 두 개 필요해요. 한 블록에는 ‘a book’처럼 여러 단어를 넣어도 됩니다.")
 
-activity_heading("🎯 단어 카드 끌어 놓기", "cards")
-st.caption("카드를 성분 칸으로 끌어 놓으세요. 클릭으로도 가능해요: 카드 선택 → ‘여기에 놓기’. 보관함으로 돌려놓을 수도 있어요.")
+assembly_tab, practice_tab = st.tabs(["🧩 문장 조립소", "🌈 연습하기"])
+with assembly_tab:
+    activity_heading("🎯 단어 카드 끌어 놓기", "cards")
+    st.caption("카드를 성분 칸으로 끌어 놓으세요. 클릭으로도 가능해요: 카드 선택 → ‘여기에 놓기’. 보관함으로 돌려놓을 수도 있어요.")
 
-activity = st.selectbox("카드 활동 선택", list(activities))
-if st.session_state.get("card_activity") != activity:
-    st.session_state.card_activity = activity
-    st.session_state.placements = {}
-    st.session_state.board_version = st.session_state.get("board_version", 0) + 1
-if st.button("카드 활동 다시 시작"):
-    st.session_state.placements = {}
-    st.session_state.board_version += 1
-card_words, card_roles = activities[activity]
-result = word_board(
-    data={"words": card_words, "roles": card_roles, "placements": st.session_state.placements},
-    key=f"word_board_{st.session_state.board_version}",
-    on_moved_change=lambda: None,
-)
-if result.moved:
-    token, target = result.moved.get("token"), result.moved.get("target")
-    if isinstance(token, int) and isinstance(target, int) and 0 <= token < len(card_words) and -1 <= target < len(card_roles):
-        placements = st.session_state.placements
-        # 한 칸에는 카드 하나. 기존 카드는 보관함으로 돌려놓습니다.
-        for old_token in list(placements):
-            if placements[old_token] == target and target != -1:
-                placements.pop(old_token)
-        placements[str(token)] = target
-        st.rerun()
-placed_words = [next((card_words[int(t)] for t, place in st.session_state.placements.items() if place == i), "") for i in range(len(card_roles))]
-if any(placed_words):
-    st.write("**카드 문장:** " + " / ".join(word or "___" for word in placed_words))
-    expected = {
-        "새들의 노래 · 1형식": ["Birds", "sing"],
-        "읽는 대상 더하기 · 3형식": ["Students", "read", "books"],
-        "기분 설명하기 · 2형식": ["She", "is", "happy"],
-        "책 선물하기 · 4형식": ["He", "gave", "me", "a book"],
-        "행복하게 만들기 · 5형식": ["We", "made", "him", "happy"],
-    }[activity]
-    if all(placed_words) and placed_words == expected:
-        st.success("잘 조립했어요! " + " ".join(placed_words) + ".")
-    elif all(placed_words):
-        st.warning("단어의 역할을 다시 살펴보세요. 누가(S), 무엇을 하거나 어떤 상태인지(V)부터 찾아보세요.")
-    else:
-        st.info("아직 비어 있는 성분 칸이 있어요. 남은 카드를 놓아 보세요.")
-    with st.expander("힌트와 완성 예시"):
-        st.write(" → ".join(f"{role}: {word}" for role, word in zip(card_roles, expected)))
-        st.write(" ".join(expected) + ".")
-st.divider()
-
-activity_heading("1. 성분 블록 고르기", "roles")
-columns = st.columns(4)
-for column, (role, meaning) in zip(columns, ROLES.items()):
-    column.button(f"＋ {role} · {meaning.split(' · ')[0]}", key=f"add_{role}", on_click=add_block, args=(role,), use_container_width=True)
-
-activity_heading("2. 문장 조립하기", "assembly")
-st.caption("입력 후 Enter를 누르거나 입력 칸 밖을 클릭하면 결과가 바로 갱신됩니다.")
-if not st.session_state.blocks:
-    st.info("위에서 S와 V 블록을 추가해 보세요. 왼쪽 예제로 시작해도 좋아요.")
-
-for index, block in enumerate(st.session_state.blocks):
-    role, block_id = block["role"], block["id"]
-    with st.container(border=True):
-        label, field, up, down, delete = st.columns([2, 5, 1, 1, 1], vertical_alignment="center")
-        label.markdown(f"**{index + 1}. {role} · {ROLES[role].split(' · ')[0]}**")
-        field.text_input(f"{index + 1}번 {role} 블록의 단어 또는 구", key=f"word_{block_id}", placeholder="단어 또는 구를 입력하세요", label_visibility="collapsed")
-        up.button("↑", key=f"up_{block_id}", help="앞으로 이동", disabled=index == 0, on_click=move_block, args=(index, -1))
-        down.button("↓", key=f"down_{block_id}", help="뒤로 이동", disabled=index == len(st.session_state.blocks) - 1, on_click=move_block, args=(index, 1))
-        delete.button("✕", key=f"delete_{block_id}", help="블록 삭제", on_click=remove_block, args=(index,))
-
-st.button("전체 비우기", on_click=clear_blocks, disabled=not st.session_state.blocks)
-activity_heading("3. 조립 결과", "results")
-blocks = st.session_state.blocks
-if blocks:
-    cards = []
-    for block in blocks:
-        role = block["role"]
-        word = st.session_state.get(f"word_{block['id']}", "").strip()
-        cards.append(f'<div style="background:{COLORS[role]};color:#172033;padding:14px 22px;border-radius:12px;text-align:center"><b>{role}</b><br>{html.escape(word or "(빈칸)")}</div>')
-    st.markdown('<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px">' + ''.join(cards) + '</div>', unsafe_allow_html=True)
-    signature = tuple(block["role"] for block in blocks)
-    st.write("**성분 순서:** " + " → ".join(signature))
-    words = [st.session_state.get(f"word_{block['id']}", "").strip() for block in blocks]
-    pattern = PATTERNS.get(signature)
-    if pattern:
-        number, structure, explanation = pattern
-        st.success(f"블록 구조 판별: {number}형식 · {structure}")
-        st.write(explanation)
-        if all(words):
-            st.write("**조립한 문장:** " + " ".join(words))
+    activity = st.selectbox("카드 활동 선택", list(activities))
+    if st.session_state.get("card_activity") != activity:
+        st.session_state.card_activity = activity
+        st.session_state.placements = {}
+        st.session_state.board_version = st.session_state.get("board_version", 0) + 1
+    if st.button("카드 활동 다시 시작"):
+        st.session_state.placements = {}
+        st.session_state.board_version += 1
+    card_words, card_roles = activities[activity]
+    result = word_board(
+        data={"words": card_words, "roles": card_roles, "placements": st.session_state.placements},
+        key=f"word_board_{st.session_state.board_version}",
+        on_moved_change=lambda: None,
+    )
+    if result.moved:
+        token, target = result.moved.get("token"), result.moved.get("target")
+        if isinstance(token, int) and isinstance(target, int) and 0 <= token < len(card_words) and -1 <= target < len(card_roles):
+            placements = st.session_state.placements
+            # 한 칸에는 카드 하나. 기존 카드는 보관함으로 돌려놓습니다.
+            for old_token in list(placements):
+                if placements[old_token] == target and target != -1:
+                    placements.pop(old_token)
+            placements[str(token)] = target
+            st.rerun()
+    placed_words = [next((card_words[int(t)] for t, place in st.session_state.placements.items() if place == i), "") for i in range(len(card_roles))]
+    if any(placed_words):
+        st.write("**카드 문장:** " + " / ".join(word or "___" for word in placed_words))
+        expected = {
+            "새들의 노래 · 1형식": ["Birds", "sing"],
+            "읽는 대상 더하기 · 3형식": ["Students", "read", "books"],
+            "기분 설명하기 · 2형식": ["She", "is", "happy"],
+            "책 선물하기 · 4형식": ["He", "gave", "me", "a book"],
+            "행복하게 만들기 · 5형식": ["We", "made", "him", "happy"],
+        }[activity]
+        if all(placed_words) and placed_words == expected:
+            st.success("잘 조립했어요! " + " ".join(placed_words) + ".")
+        elif all(placed_words):
+            st.warning("단어의 역할을 다시 살펴보세요. 누가(S), 무엇을 하거나 어떤 상태인지(V)부터 찾아보세요.")
         else:
-            st.warning("구조가 완성됐어요! 빈 블록에 단어를 입력해 문장도 완성해 보세요.")
-    else:
-        st.warning("아직 1~5형식의 기본 구조와 일치하지 않아요.")
-        if signature[0] != "S":
-            st.write("주어(S)를 맨 앞으로 옮겨 보세요.")
-        elif len(signature) < 2 or signature[1] != "V":
-            st.write("주어(S) 다음에 동사(V)를 놓아 보세요.")
-        else:
-            st.write("S + V 다음에 아무것도 놓지 않거나, C / O / O + O / O + C를 놓아 보세요.")
-    st.markdown("**💡 더 나은 문장 만들기**")
-    feedback, better_example = sentence_feedback(signature, words)
-    st.info(feedback)
-    st.write("**참고 예시:** " + better_example)
-else:
-    st.caption("블록을 추가하면 이곳에 구조와 판별 결과가 표시됩니다.")
+            st.info("아직 비어 있는 성분 칸이 있어요. 남은 카드를 놓아 보세요.")
+        with st.expander("힌트와 완성 예시"):
+            st.write(" → ".join(f"{role}: {word}" for role, word in zip(card_roles, expected)))
+            st.write(" ".join(expected) + ".")
+    st.divider()
 
-st.divider()
-st.caption("학습용 초안: 선택한 성분의 순서로 기본 형식을 판별합니다. 일부 동사에는 학습 규칙에 따른 보완 제안을 제공합니다. 모든 영어 문장의 품사·시제·문법을 검사하는 기능은 아닙니다.")
+    activity_heading("1. 성분 블록 고르기", "roles")
+    columns = st.columns(4)
+    for column, (role, meaning) in zip(columns, ROLES.items()):
+        column.button(f"＋ {role} · {meaning.split(' · ')[0]}", key=f"add_{role}", on_click=add_block, args=(role,), use_container_width=True)
+
+    activity_heading("2. 문장 조립하기", "assembly")
+    st.caption("입력 후 Enter를 누르거나 입력 칸 밖을 클릭하면 결과가 바로 갱신됩니다.")
+    if not st.session_state.blocks:
+        st.info("위에서 S와 V 블록을 추가해 보세요. 왼쪽 예제로 시작해도 좋아요.")
+
+    for index, block in enumerate(st.session_state.blocks):
+        role, block_id = block["role"], block["id"]
+        with st.container(border=True):
+            label, field, up, down, delete = st.columns([2, 5, 1, 1, 1], vertical_alignment="center")
+            label.markdown(f"**{index + 1}. {role} · {ROLES[role].split(' · ')[0]}**")
+            field.text_input(f"{index + 1}번 {role} 블록의 단어 또는 구", key=f"word_{block_id}", placeholder="단어 또는 구를 입력하세요", label_visibility="collapsed")
+            up.button("↑", key=f"up_{block_id}", help="앞으로 이동", disabled=index == 0, on_click=move_block, args=(index, -1))
+            down.button("↓", key=f"down_{block_id}", help="뒤로 이동", disabled=index == len(st.session_state.blocks) - 1, on_click=move_block, args=(index, 1))
+            delete.button("✕", key=f"delete_{block_id}", help="블록 삭제", on_click=remove_block, args=(index,))
+
+    st.button("전체 비우기", on_click=clear_blocks, disabled=not st.session_state.blocks)
+    activity_heading("3. 조립 결과", "results")
+    blocks = st.session_state.blocks
+    if blocks:
+        cards = []
+        for block in blocks:
+            role = block["role"]
+            word = st.session_state.get(f"word_{block['id']}", "").strip()
+            cards.append(f'<div style="background:{COLORS[role]};color:#172033;padding:14px 22px;border-radius:12px;text-align:center"><b>{role}</b><br>{html.escape(word or "(빈칸)")}</div>')
+        st.markdown('<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px">' + ''.join(cards) + '</div>', unsafe_allow_html=True)
+        signature = tuple(block["role"] for block in blocks)
+        st.write("**성분 순서:** " + " → ".join(signature))
+        words = [st.session_state.get(f"word_{block['id']}", "").strip() for block in blocks]
+        pattern = PATTERNS.get(signature)
+        if pattern:
+            number, structure, explanation = pattern
+            st.success(f"블록 구조 판별: {number}형식 · {structure}")
+            st.write(explanation)
+            if all(words):
+                st.write("**조립한 문장:** " + " ".join(words))
+            else:
+                st.warning("구조가 완성됐어요! 빈 블록에 단어를 입력해 문장도 완성해 보세요.")
+        else:
+            st.warning("아직 1~5형식의 기본 구조와 일치하지 않아요.")
+            if signature[0] != "S":
+                st.write("주어(S)를 맨 앞으로 옮겨 보세요.")
+            elif len(signature) < 2 or signature[1] != "V":
+                st.write("주어(S) 다음에 동사(V)를 놓아 보세요.")
+            else:
+                st.write("S + V 다음에 아무것도 놓지 않거나, C / O / O + O / O + C를 놓아 보세요.")
+        st.markdown("**💡 더 나은 문장 만들기**")
+        feedback, better_example = sentence_feedback(signature, words)
+        st.info(feedback)
+        st.write("**참고 예시:** " + better_example)
+    else:
+        st.caption("블록을 추가하면 이곳에 구조와 판별 결과가 표시됩니다.")
+
+    st.divider()
+    st.caption("학습용 초안: 선택한 성분의 순서로 기본 형식을 판별합니다. 일부 동사에는 학습 규칙에 따른 보완 제안을 제공합니다. 모든 영어 문장의 품사·시제·문법을 검사하는 기능은 아닙니다.")
+
+with practice_tab:
+    render_practice()
