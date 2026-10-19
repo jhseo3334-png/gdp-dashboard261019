@@ -1,19 +1,28 @@
-# :earth_americas: GDP dashboard template
+# 🧩 5형식 문장 구조 조립소
 
-A simple Streamlit app showing the GDP of different countries in the world.
+S(주어)·V(동사)·O(목적어)·C(보어) 블록을 조립하며 영어 1~5형식의 기본 구조를 익히는 Streamlit 실습 앱입니다.
 
-[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://gdp-dashboard-template.streamlit.app/)
+## 실행 방법
 
-### How to run it on your own machine
+Codespaces의 기존 Python 환경에서 터미널에 입력하세요. 가상환경을 만들 필요가 없습니다.
 
-1. Install the requirements
+```bash
+python -m pip install -r requirements.txt
+python -m streamlit run streamlit_app.py
+```
 
-   ```
-   $ python -m pip install -r requirements.txt
-   ```
+실행 후 Codespaces의 포트 8501 미리보기를 여세요.
 
-2. Run the app
+## 사용 방법
 
-   ```
-   $ python -m streamlit run streamlit_app.py
-   ```
+1. S·V·O·C 버튼을 눌러 블록을 추가합니다. 같은 성분도 여러 번 추가할 수 있습니다.
+2. 각 블록에 단어 또는 구를 입력하고 Enter를 누르거나 입력 칸 밖을 클릭합니다.
+3. ↑·↓ 버튼으로 순서를 바꾸고, ✕ 버튼으로 블록을 삭제합니다.
+4. 아래에서 조립한 문장과 형식 판별 결과를 확인합니다.
+5. 사이드바의 1~5형식 예제를 눌러 구조를 비교할 수 있습니다. 예제를 선택하면 현재 블록이 교체됩니다.
+
+판별 기준은 S+V, S+V+C, S+V+O, S+V+O+O, S+V+O+C입니다.
+선택한 성분 순서를 판별하며, 입력 단어의 실제 문법적 정확성은 검사하지 않습니다.
+
+메인 코드는 `streamlit_app.py`, 필요한 패키지는 `requirements.txt`에 있습니다.
+기존 `data/gdp_data.csv`는 현재 앱에서 사용하지 않습니다.
