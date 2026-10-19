@@ -82,6 +82,154 @@ activities = {
     "행복하게 만들기 · 5형식": (["happy", "him", "made", "We"], ["S", "V", "O", "C"]),
 }
 
+# (대표 뜻과 품사, 짧은 예문, 예문 해석). 수업에 필요한 단어를 여기에 추가할 수 있습니다.
+WORD_DICTIONARY = {
+    "apple": ("사과 · 명사", "I eat an apple.", "나는 사과 하나를 먹어요."),
+    "banana": ("바나나 · 명사", "I like bananas.", "나는 바나나를 좋아해요."),
+    "bird": ("새 · 명사", "Birds sing.", "새들이 노래해요."),
+    "book": ("책 · 명사 / 예약하다 · 동사", "I read a book.", "나는 책 한 권을 읽어요."),
+    "student": ("학생 · 명사", "Students read books.", "학생들이 책을 읽어요."),
+    "teacher": ("선생님 · 명사", "She is a teacher.", "그녀는 선생님이에요."),
+    "school": ("학교 · 명사", "I go to school.", "나는 학교에 가요."),
+    "friend": ("친구 · 명사", "He is my friend.", "그는 내 친구예요."),
+    "cat": ("고양이 · 명사", "The cat sleeps.", "고양이가 자요."),
+    "dog": ("개 · 명사", "The dog runs.", "개가 달려요."),
+    "music": ("음악 · 명사", "I like music.", "나는 음악을 좋아해요."),
+    "water": ("물 · 명사 / 물을 주다 · 동사", "I drink water.", "나는 물을 마셔요."),
+    "food": ("음식 · 명사", "We need food.", "우리는 음식이 필요해요."),
+    "milk": ("우유 · 명사", "She drinks milk.", "그녀는 우유를 마셔요."),
+    "ball": ("공 · 명사", "I have a ball.", "나는 공 하나를 가지고 있어요."),
+    "flower": ("꽃 · 명사", "The flower is pretty.", "그 꽃은 예뻐요."),
+    "house": ("집 · 명사", "This is my house.", "이곳은 내 집이에요."),
+    "home": ("집 · 명사 / 집으로 · 부사", "I go home.", "나는 집으로 가요."),
+    "mother": ("어머니 · 명사", "My mother sings.", "우리 어머니는 노래해요."),
+    "father": ("아버지 · 명사", "My father cooks.", "우리 아버지는 요리해요."),
+    "sister": ("여자 형제(언니·누나·여동생) · 명사", "My sister reads.", "내 여자 형제는 독서해요."),
+    "brother": ("남자 형제(형·오빠·남동생) · 명사", "My brother runs.", "내 남자 형제는 달려요."),
+    "name": ("이름 · 명사 / 이름을 짓다 · 동사", "My name is Mina.", "내 이름은 미나예요."),
+    "weather": ("날씨 · 명사", "The weather is nice.", "날씨가 좋아요."),
+    "lunch": ("점심 · 명사", "We eat lunch.", "우리는 점심을 먹어요."),
+    "read": ("읽다 · 동사", "Students read books.", "학생들이 책을 읽어요."),
+    "sing": ("노래하다 · 동사", "Birds sing.", "새들이 노래해요."),
+    "like": ("좋아하다 · 동사 / ~처럼 · 전치사", "I like music.", "나는 음악을 좋아해요."),
+    "love": ("사랑하다 · 동사 / 사랑 · 명사", "I love my family.", "나는 내 가족을 사랑해요."),
+    "give": ("주다 · 동사", "He gave me a book.", "그는 나에게 책 한 권을 주었어요."),
+    "make": ("만들다, ~하게 하다 · 동사", "We made him happy.", "우리는 그를 행복하게 했어요."),
+    "eat": ("먹다 · 동사", "I eat an apple.", "나는 사과 하나를 먹어요."),
+    "drink": ("마시다 · 동사 / 음료 · 명사", "I drink water.", "나는 물을 마셔요."),
+    "run": ("달리다 · 동사", "Dogs run.", "개들이 달려요."),
+    "walk": ("걷다 · 동사", "We walk together.", "우리는 함께 걸어요."),
+    "sleep": ("자다 · 동사 / 잠 · 명사", "The baby sleeps.", "아기가 자요."),
+    "play": ("놀다, 경기하다, 연주하다 · 동사", "I play the piano.", "나는 피아노를 연주해요."),
+    "study": ("공부하다 · 동사 / 공부 · 명사", "I study English.", "나는 영어를 공부해요."),
+    "learn": ("배우다 · 동사", "We learn English.", "우리는 영어를 배워요."),
+    "teach": ("가르치다 · 동사", "They teach English.", "그들은 영어를 가르쳐요."),
+    "write": ("쓰다 · 동사", "I write a letter.", "나는 편지를 써요."),
+    "speak": ("말하다 · 동사", "I speak English.", "나는 영어를 말해요."),
+    "listen": ("듣다, 귀 기울이다 · 동사", "I listen to music.", "나는 음악을 들어요."),
+    "see": ("보다 · 동사", "I see a bird.", "나는 새 한 마리를 봐요."),
+    "watch": ("지켜보다 · 동사 / 손목시계 · 명사", "We watch TV.", "우리는 텔레비전을 봐요."),
+    "go": ("가다 · 동사", "I go to school.", "나는 학교에 가요."),
+    "come": ("오다 · 동사", "They come here.", "그들이 여기로 와요."),
+    "have": ("가지다, 먹다 · 동사", "I have a book.", "나는 책 한 권을 가지고 있어요."),
+    "want": ("원하다 · 동사", "I want a book.", "나는 책 한 권을 원해요."),
+    "need": ("필요로 하다 · 동사", "We need water.", "우리는 물이 필요해요."),
+    "enjoy": ("즐기다 · 동사", "I enjoy music.", "나는 음악을 즐겨요."),
+    "help": ("돕다 · 동사 / 도움 · 명사", "I help my friend.", "나는 친구를 도와요."),
+    "open": ("열다 · 동사 / 열린 · 형용사", "I open the door.", "나는 문을 열어요."),
+    "close": ("닫다 · 동사 / 가까운 · 형용사", "I close the door.", "나는 문을 닫아요."),
+    "be": ("~이다, ~한 상태이다, 있다 · 동사", "She is happy.", "그녀는 행복해요."),
+    "become": ("~이 되다 · 동사", "He became a teacher.", "그는 선생님이 되었어요."),
+    "seem": ("~인 것처럼 보이다 · 동사", "She seems happy.", "그녀는 행복해 보여요."),
+    "happy": ("행복한 · 형용사", "She is happy.", "그녀는 행복해요."),
+    "sad": ("슬픈 · 형용사", "He is sad.", "그는 슬퍼요."),
+    "good": ("좋은 · 형용사", "This book is good.", "이 책은 좋아요."),
+    "bad": ("나쁜 · 형용사", "The weather is bad.", "날씨가 나빠요."),
+    "big": ("큰 · 형용사", "The dog is big.", "그 개는 커요."),
+    "small": ("작은 · 형용사", "The cat is small.", "그 고양이는 작아요."),
+    "cute": ("귀여운 · 형용사", "The cat is cute.", "그 고양이는 귀여워요."),
+    "pretty": ("예쁜 · 형용사", "The flower is pretty.", "그 꽃은 예뻐요."),
+    "hungry": ("배고픈 · 형용사", "I am hungry.", "나는 배고파요."),
+    "tired": ("피곤한 · 형용사", "He is tired.", "그는 피곤해요."),
+    "kind": ("친절한 · 형용사 / 종류 · 명사", "She is kind.", "그녀는 친절해요."),
+    "i": ("나(는/가) · 대명사", "I read books.", "나는 책을 읽어요."),
+    "you": ("너, 당신, 너희 · 대명사", "You are kind.", "너는 친절해요."),
+    "he": ("그(는/가) · 대명사", "He sings.", "그는 노래해요."),
+    "she": ("그녀(는/가) · 대명사", "She reads.", "그녀는 독서해요."),
+    "it": ("그것 · 대명사", "It is small.", "그것은 작아요."),
+    "we": ("우리(는/가) · 대명사", "We study English.", "우리는 영어를 공부해요."),
+    "they": ("그들, 그것들 · 대명사", "They sing.", "그들은 노래해요."),
+    "me": ("나를, 나에게 · 대명사", "He gave me a book.", "그는 나에게 책을 주었어요."),
+    "him": ("그를, 그에게 · 대명사", "We made him happy.", "우리는 그를 행복하게 했어요."),
+    "her": ("그녀를, 그녀에게 · 대명사 / 그녀의 · 소유 한정사", "I like her.", "나는 그녀를 좋아해요."),
+    "us": ("우리를, 우리에게 · 대명사", "She helps us.", "그녀는 우리를 도와요."),
+    "them": ("그들을, 그들에게 · 대명사", "I help them.", "나는 그들을 도와요."),
+    "my": ("나의 · 소유 한정사", "This is my book.", "이것은 내 책이에요."),
+    "a": ("하나의, 어떤 · 부정관사", "I have a book.", "나는 책 한 권을 가지고 있어요."),
+    "an": ("하나의, 어떤 · 모음 소리 앞의 부정관사", "I eat an apple.", "나는 사과 하나를 먹어요."),
+    "the": ("그, 특정한 대상을 가리키는 정관사", "The bird sings.", "그 새가 노래해요."),
+    "english": ("영어 · 명사 / 영어의 · 형용사", "I study English.", "나는 영어를 공부해요."),
+}
+# 불규칙 변화와 자주 쓰는 복수형을 명시해서 잘못된 어근 추측을 피합니다.
+WORD_FORMS = {
+    "birds": ("bird", "bird의 복수형: 새들"), "books": ("book", "book의 복수형: 책들"),
+    "students": ("student", "student의 복수형: 학생들"), "apples": ("apple", "apple의 복수형: 사과들"),
+    "bananas": ("banana", "banana의 복수형: 바나나들"), "cats": ("cat", "cat의 복수형: 고양이들"),
+    "dogs": ("dog", "dog의 복수형: 개들"), "friends": ("friend", "friend의 복수형: 친구들"),
+    "sings": ("sing", "sing의 현재형(주어가 3인칭 단수일 때)"),
+    "reads": ("read", "read의 현재형(주어가 3인칭 단수일 때)"),
+    "likes": ("like", "like의 현재형(주어가 3인칭 단수일 때)"),
+    "gave": ("give", "give의 과거형: 주었다"), "made": ("make", "make의 과거형·과거분사형"),
+    "went": ("go", "go의 과거형: 갔다"), "ate": ("eat", "eat의 과거형: 먹었다"),
+    "ran": ("run", "run의 과거형: 달렸다"), "wrote": ("write", "write의 과거형: 썼다"),
+    "is": ("be", "be동사의 현재형: he, she, it 등과 사용"),
+    "am": ("be", "be동사의 현재형: I와 사용"),
+    "are": ("be", "be동사의 현재형: you, we, they 등과 사용"),
+    "was": ("be", "be동사의 과거형: I, he, she, it 등과 사용"),
+    "were": ("be", "be동사의 과거형: you, we, they 등과 사용"),
+}
+
+
+def dictionary_answer(question):
+    """단어 뜻 질문만 처리하고 문장 구조 질문은 기존 도움말로 넘깁니다."""
+    tokens = re.findall(r"[a-z]+(?:'[a-z]+)?", question)
+    bare = bool(re.fullmatch(r"[a-z]+[?!.,\s]*", question))
+    meaning_intent = any(marker in question for marker in ("뜻", "의미", "무슨 말", "무슨말", "뭐야", "뭐예요", "뭔가요", "meaning", "mean", "define"))
+    if not bare and not meaning_intent:
+        return None
+    # 성분/형식 자체에 대한 질문은 문법 도움말에서 설명합니다.
+    if any(term in question for term in ("주어", "동사", "목적어", "보어", "형식")):
+        if not tokens or all(token in {"s", "v", "o", "c"} for token in tokens):
+            return None
+    if bare and tokens[0] in {"s", "v", "o", "c"}:
+        return None
+    if not bare:
+        stop_words = {"what", "does", "do", "mean", "means", "meaning", "of", "define", "please", "tell", "the", "word", "is", "in", "korean"}
+        # 따옴표 안의 단어는 영어 질문의 기능어와 같아도 찾아줍니다.
+        quoted = re.findall(r"['\"‘“]([a-z]+)['\"’”]", question)
+        if quoted:
+            tokens = quoted
+        elif re.search(r"[가-힣]", question):
+            tokens = [token for token in tokens if token not in {"meaning", "mean", "define"}]
+        else:
+            tokens = [token for token in tokens if token not in stop_words]
+    if not tokens:
+        return "어떤 영어 단어의 뜻이 궁금한가요? **apple 뜻**, **read는 무슨 뜻이야?**처럼 영어 단어를 함께 적어 주세요. 📖"
+    if len(tokens) != 1:
+        return "기초 사전에서는 한 번에 영어 단어 하나씩 찾아볼 수 있어요. **books 뜻**처럼 다시 질문해 주세요. 문장 전체 번역은 제공하지 않아요. 📖"
+    word = tokens[0]
+    base, form_note = WORD_FORMS.get(word, (word, ""))
+    entry = WORD_DICTIONARY.get(base)
+    if entry is None:
+        from difflib import get_close_matches
+        matches = get_close_matches(word, list(WORD_DICTIONARY) + list(WORD_FORMS), n=3, cutoff=0.75)
+        suggestion = " 혹시 **" + ", ".join(matches) + "** 중 하나인가요?" if matches else " **apple**, **read**, **happy** 같은 기초 단어를 질문해 보세요."
+        return "아직 기초 사전에 등록되지 않은 단어예요. 철자를 확인해 주세요." + suggestion
+    meaning, example, translation = entry
+    note = f"\n\n단어 형태: {form_note}" if form_note else ""
+    return f"📖 **{word}** — {meaning}{note}\n\n**예문:** {example}\n\n**해석:** {translation}\n\n단어는 문장에 따라 뜻과 역할이 달라질 수 있어요. 위 내용은 대표 뜻과 예문이에요."
+
+
 def answer_question(question, activity_key):
     """외부 AI 없이 학습 주제별 규칙과 현재 조립 상태로 답합니다."""
     q = unicodedata.normalize("NFKC", question).strip().lower()
@@ -90,6 +238,9 @@ def answer_question(question, activity_key):
         return "궁금한 점을 한 문장으로 적어 주세요. 예: ‘목적어와 보어는 어떻게 달라요?’ 🐣"
     if len(q) > 500:
         return "질문이 조금 길어요. 가장 어려운 부분 하나를 500자 이내로 다시 질문해 주세요. 🐣"
+    dictionary_reply = dictionary_answer(q)
+    if dictionary_reply is not None:
+        return dictionary_reply
     # 핵심어 하나가 들어 있다고 모든 질문을 학습 질문으로 취급하지 않습니다.
     unrelated = ("날씨", "점심", "저녁메뉴", "주식", "코인", "로또", "게임추천", "연예인", "맛집", "비밀번호", "시스템프롬프트")
     if any(word in compact for word in unrelated):
@@ -125,15 +276,6 @@ def answer_question(question, activity_key):
     ):
         if keyword in q or re.search(rf"(?<![a-z]){role.lower()}(?![a-z])", q):
             return explanation
-    vocabulary = {
-        "birds": "Birds는 ‘새들’이라는 뜻이에요. Birds sing.에서는 노래하는 대상이므로 주어(S)예요.",
-        "sing": "sing은 ‘노래하다’라는 동사(V)예요. Birds sing.은 S + V, 1형식이에요.",
-        "books": "books는 ‘책들’이에요. Students read books.에서는 읽는 대상이므로 목적어(O)예요.",
-        "happy": "happy는 ‘행복한’이라는 형용사예요. She is happy.에서는 주어를 설명하는 C, We made him happy.에서는 목적어를 설명하는 C예요.",
-    }
-    for word, explanation in vocabulary.items():
-        if re.search(rf"(?<![a-z]){word}(?![a-z])", q):
-            return explanation
     if any(word in compact for word in ("모르", "어려", "막혔", "힌트", "도와", "왜", "틀렸", "맞아", "맞나요", "빈칸", "부족", "예시", "예제", "형식", "문장")):
         if activity_key == "cards":
             activity = st.session_state.get("card_activity", "새들의 노래 · 1형식")
@@ -160,9 +302,9 @@ def activity_heading(title, key, sidebar=False):
     if st.session_state.get(f"help_open_{key}", False):
         with st.container(border=True):
             st.markdown("**🐣 삐약 선생님에게 물어봐!**")
-            st.caption("문장 성분·1~5형식·활동 방법을 설명하는 규칙 기반 도움말이에요. 예: ‘목적어와 보어의 차이는?’")
+            st.caption("문장 성분·1~5형식·기초 단어 뜻을 물어보세요. 예: ‘apple 뜻’, ‘목적어와 보어의 차이는?’")
             with st.form(f"help_form_{key}"):
-                question = st.text_input("어떤 점이 어렵나요?", placeholder="예: Students read는 틀린 문장인가요?", max_chars=500, key=f"help_question_{key}")
+                question = st.text_input("어떤 점이 어렵나요?", placeholder="예: read는 무슨 뜻이야? / Students read는 틀렸나요?", max_chars=500, key=f"help_question_{key}")
                 submitted = st.form_submit_button("질문하기 🌱")
             if submitted:
                 st.session_state[f"help_answer_{key}"] = answer_question(question, key)
