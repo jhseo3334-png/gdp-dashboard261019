@@ -2,6 +2,7 @@ import html
 import re
 import unicodedata
 
+import pandas as pd
 import streamlit as st
 
 st.set_page_config(page_title="5형식 문장 어렵지 않아요", page_icon="🧩", layout="wide")
@@ -455,6 +456,107 @@ def normalize_practice_answer(value):
     return " ".join(value.rstrip(".!? ").split())
 
 
+def get_problem_id(level, question_number):
+    return f"{level}_{question_number}"
+
+
+def get_question_detail(problem_id):
+    level, question_number = map(int, problem_id.split("_"))
+    prompt, instruction, choices, correct, explanation = PRACTICE[level]["questions"][question_number - 1]
+    return level, question_number, prompt, instruction, choices, correct, explanation
+
+
+def get_learning_summary():
+    results = st.session_state.setdefault("practice_results", {})
+    total_questions = sum(len(info["questions"]) for info in PRACTICE.values())
+    total_correct = sum(1 for record in results.values() if record.get("correct") is True)
+    attempted = len(results)
+    incorrect = attempted - total_correct
+    unanswered = total_questions - attempted
+    overall_rate = (total_correct / attempted * 100) if attempted else 0.0
+
+    stage_data = {}
+    for level in PRACTICE:
+        q_count = len(PRACTICE[level]["questions"])
+        stage_correct = 0
+        stage_attempted = 0
+        for index in range(1, q_count + 1):
+            problem_id = get_problem_id(level, index)
+            record = results.get(problem_id)
+            if record is not None:
+                stage_attempted += 1
+                if record.get("correct") is True:
+                    stage_correct += 1
+        stage_incorrect = stage_attempted - stage_correct
+        stage_unanswered = q_count - stage_attempted
+        stage_rate = (stage_correct / stage_attempted * 100) if stage_attempted else 0.0
+        stage_data[level] = {
+            "level": level,
+            "title": PRACTICE[level]["title"],
+            "total": q_count,
+            "correct": stage_correct,
+            "incorrect": stage_incorrect,
+            "unanswered": stage_unanswered,
+            "attempted": stage_attempted,
+            "rate": round(stage_rate, 1),
+        }
+
+    highest_stage = max(stage_data.items(), key=lambda item: item[1]["rate"])[0] if stage_data else 1
+    lowest_stage = min(stage_data.items(), key=lambda item: item[1]["rate"])[0] if stage_data else 1
+
+    return {
+        "total_questions": total_questions,
+        "correct": total_correct,
+        "incorrect": incorrect,
+        "unanswered": unanswered,
+        "attempted": attempted,
+        "overall_rate": round(overall_rate, 1),
+        "progress": round((attempted / total_questions) * 100, 1) if total_questions else 0.0,
+        "stage_data": stage_data,
+        "highest_stage": highest_stage,
+        "lowest_stage": lowest_stage,
+    }
+
+
+def get_achievement_label(rate):
+    if rate >= 90:
+        return "매우 우수 – 문장 구조를 정확하게 이해하고 있어요!"
+    if rate >= 70:
+        return "우수 – 대부분의 문장 구조를 잘 이해하고 있어요."
+    if rate >= 50:
+        return "보통 – 일부 문장 형식에 대한 추가 연습이 필요해요."
+    return "보충 학습 필요 – 기초 개념을 다시 확인하고 천천히 연습해 보세요."
+
+
+def get_stage_guidance(level):
+    guidance = {
+        1: "1단계에서는 문장 속에서 주어와 동사를 먼저 찾는 연습이 중요해요. 누가 무엇을 하는지부터 확인해 보세요.",
+        2: "2단계에서는 주어의 상태나 정체를 설명하는 보어를 다시 살펴보세요. be동사와 보어의 관계를 익히면 도움이 돼요.",
+        3: "3단계에서는 동사 뒤에 오는 목적어를 찾는 연습이 필요해요. 어떤 대상을 말하는지 확인해 보세요.",
+        4: "4단계에서는 간접목적어와 직접목적어의 차이를 확인해 보세요. 누구에게 무엇을 주는지 구분하면 쉬워져요.",
+        5: "5단계에서는 목적어가 어떤 상태인지 설명하는 보어를 찾는 연습이 필요해요. 목적어와 보어의 연결을 다시 확인해 보세요.",
+    }
+    return guidance.get(level, "문장 구조를 다시 천천히 확인하면서 기본형을 익혀 보세요.")
+
+
+def get_retry_summary():
+    retry_results = st.session_state.setdefault("retry_results", {})
+    retry_total = len(retry_results)
+    retry_correct = sum(1 for record in retry_results.values() if record.get("retry_correct") is True)
+    retry_rate = (retry_correct / retry_total * 100) if retry_total else 0.0
+    return {
+        "total": retry_total,
+        "correct": retry_correct,
+        "rate": round(retry_rate, 1),
+    }
+
+
+def reset_learning_state():
+    st.session_state.practice_results = {}
+    st.session_state.retry_results = {}
+    st.session_state.reset_confirm = False
+
+
 def render_practice():
     activity_heading("🌈 차근차근 연습하기", "practice")
     st.write("레벨과 문제 번호를 고르고 도전해 보세요. 틀려도 괜찮아요, 다시 하면 되니까요! 🐣")
@@ -463,11 +565,10 @@ def render_practice():
     question_number = question_column.selectbox("문제 번호", range(1, len(PRACTICE[level]["questions"]) + 1), format_func=lambda n: f"{n}번 문제", key=f"practice_number_{level}")
     st.caption(PRACTICE[level]["description"])
     prompt, instruction, choices, correct, explanation = PRACTICE[level]["questions"][question_number - 1]
-    problem_id = f"{level}_{question_number}"
+    problem_id = get_problem_id(level, question_number)
     results = st.session_state.setdefault("practice_results", {})
-    solved = sum(result["correct"] for result in results.values())
-    total = sum(len(info["questions"]) for info in PRACTICE.values())
-    st.progress(solved / total, text=f"🌱 정답으로 완성한 문제 {solved} / {total}")
+    summary = get_learning_summary()
+    st.progress(summary["progress"] / 100, text=f"🌱 학습 진행률 {summary['attempted']} / {summary['total_questions']} 문항 완료 ({summary['progress']}%)")
     with st.container(border=True):
         st.markdown(f"### 🐾 LEVEL {level} · {question_number}번")
         st.markdown("**" + prompt + "**")
@@ -480,7 +581,7 @@ def render_practice():
                 answer = st.radio("답을 골라 주세요", choices, index=None, key=f"practice_answer_{problem_id}")
             submitted = st.form_submit_button("답 제출하기 🐥")
         if submitted:
-            if answer is None or not answer.strip():
+            if answer is None or not str(answer).strip():
                 st.warning("🐣 아직 답이 비어 있어요. 답을 고르거나 적은 뒤 함께 도전해 봐요!")
             else:
                 is_correct = normalize_practice_answer(answer) == normalize_practice_answer(correct)
@@ -488,7 +589,7 @@ def render_practice():
                 st.rerun()
         if problem_id in results:
             result = results[problem_id]
-            st.write("**제출한 답:** " + result["answer"])
+            st.write("**제출한 답:** " + str(result["answer"]))
             if result["correct"]:
                 st.success("🎉 딩동댕! 정답이에요! 한 걸음 더 성장했어요. 정말 잘했어요! 🐥✨")
             else:
@@ -497,6 +598,114 @@ def render_practice():
             st.info("💡 " + explanation)
             st.caption("답을 바꾸었다면 ‘답 제출하기’를 다시 눌러 주세요. 위 결과는 마지막으로 제출한 답의 결과예요.")
     st.caption("연습 결과는 현재 접속 세션에서만 유지돼요. LEVEL은 난이도를 뜻하며 문장 형식 번호와는 달라요.")
+
+
+def render_analysis_dashboard():
+    st.title("📊 나의 학습 분석")
+    summary = get_learning_summary()
+    total_questions = summary["total_questions"]
+    overall_rate = summary["overall_rate"]
+    achievement = get_achievement_label(overall_rate)
+
+    col1, col2, col3, col4 = st.columns(4)
+    col1.metric("총 정답 개수", summary["correct"])
+    col2.metric("전체 정답률", f"{overall_rate:.1f}%")
+    col3.metric("학습 완료 문항 수", summary["attempted"])
+    col4.metric("학습 성취 수준", achievement[:8] + "..." if len(achievement) > 8 else achievement)
+
+    if total_questions:
+        progress_pct = summary["progress"]
+        st.progress(progress_pct / 100, text=f"진행률: {summary['attempted']} / {total_questions} 문항 ({progress_pct:.1f}%)")
+    else:
+        st.info("아직 문제를 풀지 않았어요. 학습을 시작해 보세요. 🐣")
+
+    st.markdown("### 📈 단계별 학습 성취도 그래프")
+    chart_data = pd.DataFrame([
+        {"단계": f"{level}단계", "정답률": info["rate"]}
+        for level, info in summary["stage_data"].items()
+    ])
+    if not chart_data.empty:
+        st.bar_chart(chart_data.set_index("단계")["정답률"], use_container_width=True)
+    else:
+        st.info("아직 단계별 결과가 없어요.")
+
+    st.markdown("### 📋 단계별 학습 결과표")
+    table_data = []
+    for level, info in summary["stage_data"].items():
+        table_data.append({
+            "단계": f"{level}단계",
+            "전체 문항": info["total"],
+            "정답": info["correct"],
+            "오답": info["incorrect"],
+            "미응답": info["unanswered"],
+            "정답률": f"{info['rate']:.1f}%",
+        })
+    table_df = pd.DataFrame(table_data)
+    st.dataframe(table_df, use_container_width=True)
+
+    st.markdown("### 🧠 학생 맞춤형 학습 분석 및 피드백")
+    st.success(achievement)
+    lowest_level = min(summary["stage_data"].items(), key=lambda item: item[1]["rate"])[0]
+    st.info(f"현재 가장 보충 학습이 필요한 영역은 {lowest_level}단계입니다. {get_stage_guidance(lowest_level)}")
+
+    st.markdown("### ❌ 틀린 문제 다시 보기")
+    results = st.session_state.get("practice_results", {})
+    wrong_ids = [problem_id for problem_id, record in results.items() if record.get("correct") is False]
+    if wrong_ids:
+        selected_wrong = st.selectbox("틀린 문제 선택", wrong_ids, format_func=lambda pid: f"{pid.split('_')[0]}단계 {pid.split('_')[1]}번 문제")
+        level, question_number, prompt, instruction, choices, correct, explanation = get_question_detail(selected_wrong)
+        selected_answer = results[selected_wrong].get("answer")
+        st.write(f"**문제:** {prompt}")
+        st.write(f"**선택한 답:** {selected_answer}")
+        st.write(f"**정답:** {correct}")
+        st.info(f"**문법 설명:** {explanation}")
+
+        retry_results = st.session_state.setdefault("retry_results", {})
+        with st.form(f"retry_form_{selected_wrong}"):
+            if choices is None:
+                retry_answer = st.text_input("다시 풀어 보세요", key=f"retry_answer_{selected_wrong}", placeholder="정답을 입력해 보세요")
+            else:
+                retry_answer = st.radio("다시 선택해 보세요", choices, index=None, key=f"retry_answer_{selected_wrong}")
+            retry_submit = st.form_submit_button("재도전하기")
+
+        if retry_submit:
+            if retry_answer is None or not str(retry_answer).strip():
+                st.warning("재도전할 답을 입력해 주세요.")
+            else:
+                retry_correct = normalize_practice_answer(retry_answer) == normalize_practice_answer(correct)
+                retry_results[selected_wrong] = {
+                    "initial_answer": selected_answer,
+                    "initial_correct": False,
+                    "retry_answer": retry_answer,
+                    "retry_correct": retry_correct,
+                }
+                st.rerun()
+
+        if selected_wrong in retry_results:
+            retry_record = retry_results[selected_wrong]
+            retry_rate = get_retry_summary()["rate"]
+            if retry_record.get("retry_correct"):
+                st.success("재도전 성공! 정답을 맞혔어요. 꾸준히 연습하고 있어요! ✨")
+            else:
+                st.warning("재도전 결과는 아직 부족하지만, 정답을 확인하고 다시 연습해 보세요.")
+            st.caption(f"재도전 전: 0% / 재도전 후: {retry_rate}% (틀린 문제 기준)")
+    else:
+        st.info("틀린 문제가 아직 없어요. 지금처럼 꾸준히 학습하면 더 높은 성취도를 기대할 수 있어요! 🌟")
+
+    st.markdown("### 🔄 학습 결과 초기화")
+    if st.button("처음부터 다시 학습하기"):
+        st.session_state.reset_confirm = True
+
+    if st.session_state.get("reset_confirm"):
+        st.warning("정말로 지금까지의 학습 결과를 모두 지우시겠어요? 이 작업은 되돌릴 수 없어요.")
+        col_reset_yes, col_reset_no = st.columns(2)
+        if col_reset_yes.button("네, 초기화할게요"):
+            reset_learning_state()
+            st.success("학습 결과를 초기화했습니다. 새로 시작해 보세요! 🚀")
+            st.rerun()
+        if col_reset_no.button("취소"):
+            st.session_state.reset_confirm = False
+            st.rerun()
 
 
 st.title("5형식 문장 어렵지 않아요")
@@ -515,7 +724,7 @@ with st.sidebar:
         st.write(f"**{role}** — {meaning}")
     st.info("4형식에는 O 블록이 두 개 필요해요. 한 블록에는 ‘a book’처럼 여러 단어를 넣어도 됩니다.")
 
-assembly_tab, practice_tab = st.tabs(["🧩 문장 조립소", "🌈 연습하기"])
+assembly_tab, practice_tab, analysis_tab = st.tabs(["🧩 문장 조립소", "🌈 연습하기", "📊 나의 학습 분석"])
 with assembly_tab:
     activity_heading("🎯 단어 카드 끌어 놓기", "cards")
     st.caption("카드를 성분 칸으로 끌어 놓으세요. 클릭으로도 가능해요: 카드 선택 → ‘여기에 놓기’. 보관함으로 돌려놓을 수도 있어요.")
@@ -627,3 +836,6 @@ with assembly_tab:
 
 with practice_tab:
     render_practice()
+
+with analysis_tab:
+    render_analysis_dashboard()
