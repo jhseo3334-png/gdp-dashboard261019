@@ -11,21 +11,45 @@ st.set_page_config(page_title="5형식 문장 어렵지 않아요", page_icon="�
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Jua&display=swap');
-.stApp {background:linear-gradient(135deg,#fffdf7 0%,#f2f7ff 100%);color:#24334b;
-  --st-text-color:#24334b;--st-background-color:#fffdf7;--st-secondary-background-color:#edf3fc;}
+.stApp {
+  background: linear-gradient(135deg, #fff9ef 0%, #eefafe 35%, #f6f1ff 100%);
+  color: #24334b;
+  --st-text-color: #24334b;
+  --st-background-color: #fffaf5;
+  --st-secondary-background-color: #f3f9ff;
+}
 [data-testid="stMain"], [data-testid="stSidebar"] {font-family:'Gowun Dodum','Malgun Gothic',sans-serif;}
-[data-testid="stSidebar"] {background:#eef2ff;color:#24334b;}
+[data-testid="stSidebar"] {
+  background: linear-gradient(180deg, #f4f0ff 0%, #eaf9ff 100%);
+  color: #24334b;
+  border-right: 1px solid #dfe8ff;
+}
 h1,h2,h3 {font-family:'Jua','Arial Rounded MT Bold','Malgun Gothic',sans-serif!important;color:#304577!important;letter-spacing:.02em;}
 [data-testid="stMarkdownContainer"] p, [data-testid="stWidgetLabel"] p {font-size:1.06rem;line-height:1.8;}
 [data-testid="stCaptionContainer"] {color:#4c5d77;}
 .stButton button, [data-testid="stFormSubmitButton"] button {
-  border:1.5px solid #b6c6e5;border-radius:16px;background:#fff;color:#304577;
-  font-family:'Gowun Dodum','Malgun Gothic',sans-serif;min-height:44px;}
-.stButton button:hover, [data-testid="stFormSubmitButton"] button:hover {border-color:#657ac0;background:#eaf0ff;color:#253b70;}
-button:focus-visible, input:focus-visible, textarea:focus-visible {outline:3px solid #596fc1!important;outline-offset:3px;}
-[data-testid="stVerticalBlockBorderWrapper"] {border-radius:18px;}
-[data-testid="stTextInput"] input, [data-testid="stTextArea"] textarea {font-family:'Gowun Dodum','Malgun Gothic',sans-serif;}
-.mascot {background:#fff0d7;border:1px solid #edcf91;border-radius:22px;padding:16px 22px;color:#514226;margin:10px 0 24px;line-height:1.8;}
+  border:1.5px solid #cddcff;border-radius:16px;background:linear-gradient(180deg,#ffffff,#f4f8ff);color:#304577;
+  font-family:'Gowun Dodum','Malgun Gothic',sans-serif;min-height:44px;box-shadow:0 4px 10px rgba(106,124,168,0.12);}
+.stButton button:hover, [data-testid="stFormSubmitButton"] button:hover {border-color:#93a8eb;background:linear-gradient(180deg,#eef4ff,#e6f9ff);color:#253b70;}
+button:focus-visible, input:focus-visible, textarea:focus-visible {outline:3px solid #9aa8ea!important;outline-offset:3px;}
+[data-testid="stVerticalBlockBorderWrapper"] {border-radius:18px;border:1px solid #e7ecff;background:rgba(255,255,255,0.72);}
+[data-testid="stTextInput"] input, [data-testid="stTextArea"] textarea {
+  font-family:'Gowun Dodum','Malgun Gothic',sans-serif;
+  background:#fffdfc;border:1px solid #dfe9ff;border-radius:12px;}
+[data-testid="stSelectbox"], [data-testid="stRadio"], [data-testid="stCheckbox"], [data-testid="stSlider"] {
+  background: rgba(255,255,255,0.5);
+}
+.mascot {
+  background: linear-gradient(135deg, #fff4d9 0%, #ffe7ee 50%, #eefbff 100%);
+  border:1px solid #f3d48d;border-radius:22px;padding:16px 22px;color:#514226;margin:10px 0 24px;line-height:1.8;
+  box-shadow:0 10px 24px rgba(251,196,110,0.14);
+}
+[data-testid="stMetric"] {
+  background: linear-gradient(180deg, rgba(255,255,255,0.92), rgba(243,249,255,0.92));
+  border:1px solid #dfe9ff;
+  border-radius:18px;
+  box-shadow:0 8px 20px rgba(61,90,160,0.08);
+}
 </style>
 """, unsafe_allow_html=True)
 
