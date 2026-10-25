@@ -377,6 +377,40 @@ word_board = st.components.v2.component(
 if "blocks" not in st.session_state:
     st.session_state.blocks = []
     st.session_state.next_id = 0
+if "student_info" not in st.session_state:
+    st.session_state.student_info = {}
+if "app_started" not in st.session_state:
+    st.session_state.app_started = False
+
+
+def render_student_info_form():
+    st.title("🧩 영어 문법 학습 시작")
+    st.markdown("<div class='mascot'><b>학생 정보를 입력하고 학습을 시작해 보세요.</b><br>입력한 정보는 학습 결과 페이지에서 함께 보여집니다.</div>", unsafe_allow_html=True)
+
+    with st.form("student_info_form"):
+        col1, col2 = st.columns(2)
+        with col1:
+            name = st.text_input("학생 이름", placeholder="예: 김민지")
+            grade = st.selectbox("학년", ["1학년", "2학년", "3학년", "중학교 1학년", "중학교 2학년", "중학교 3학년"], index=0)
+        with col2:
+            class_name = st.text_input("반", placeholder="예: 1반")
+            learning_goal = st.selectbox("학습 목표", ["기초 문법 익히기", "문장 구조 이해하기", "5형식 완벽 정복", "다시 복습하기"], index=0)
+
+        st.text_area("한 줄 소개", placeholder="예: 5형식을 더 잘 알고 싶어요.", height=100)
+        submit = st.form_submit_button("학습 시작하기 🚀", use_container_width=True)
+
+    if submit:
+        if not name.strip():
+            st.warning("학생 이름을 입력해 주세요.")
+        else:
+            st.session_state.student_info = {
+                "name": name.strip(),
+                "grade": grade,
+                "class_name": class_name.strip(),
+                "learning_goal": learning_goal,
+            }
+            st.session_state.app_started = True
+            st.rerun()
 
 
 def add_block(role, word=""):
@@ -708,12 +742,50 @@ def render_analysis_dashboard():
             st.rerun()
 
 
+if not st.session_state.app_started:
+    render_student_info_form()
+    st.stop()
+
+student_info = st.session_state.get("student_info", {})
+student_name = student_info.get("name", "학생")
+
+profile_col, edit_col = st.columns([5, 1])
+with profile_col:
+    st.markdown(
+        f"""
+        <div style="background:linear-gradient(135deg,#f4f8ff,#fff7e6);border:1px solid #dfe9ff;border-radius:22px;padding:18px 22px;margin:0 0 18px 0;box-shadow:0 8px 20px rgba(44,76,126,0.08);">
+          <div style="display:flex;flex-wrap:wrap;gap:18px;align-items:center;justify-content:space-between;">
+            <div>
+              <div style="font-size:0.8rem;color:#5d6c86;letter-spacing:0.12em;font-weight:800;">STUDENT PROFILE</div>
+              <div style="font-size:1.9rem;font-weight:800;color:#264a7f;margin-top:8px;">{student_name} 학생</div>
+            </div>
+            <div style="display:flex;flex-wrap:wrap;gap:10px;">
+              <span style="background:#e0ebff;border-radius:999px;padding:9px 14px;font-size:0.9rem;color:#243b70;font-weight:700;">학년: {student_info.get('grade', '-')}</span>
+              <span style="background:#e7f9ef;border-radius:999px;padding:9px 14px;font-size:0.9rem;color:#215b4a;font-weight:700;">반: {student_info.get('class_name', '-')}</span>
+              <span style="background:#fff0d6;border-radius:999px;padding:9px 14px;font-size:0.9rem;color:#81581a;font-weight:700;">목표: {student_info.get('learning_goal', '-')}</span>
+            </div>
+          </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+with edit_col:
+    if st.button("학생 정보 수정", use_container_width=True):
+        st.session_state.app_started = False
+        st.rerun()
+
 st.title("5형식 문장 어렵지 않아요")
 st.markdown('<div class="mascot"><span style="font-size:2rem" aria-hidden="true">🐣 🌱 🧩</span><br><b>삐약 선생님과 한 문장씩, 차근차근!</b><br>틀려도 괜찮아요. 헷갈리는 순간에는 활동 옆 ‘도와줘’를 눌러 보세요.</div>', unsafe_allow_html=True)
 st.write("성분 블록을 고르고, 단어를 넣고, 순서를 바꾸며 영어 문장의 뼈대를 살펴보세요.")
 st.caption("① 블록 추가 → ② 단어 또는 구 입력 → ③ ↑ ↓로 순서 변경 → ④ 형식 확인")
 
 with st.sidebar:
+    st.markdown("### 👤 학생 정보")
+    st.write(f"이름: **{student_name}**")
+    st.write(f"학년: **{student_info.get('grade', '-')}**")
+    st.write(f"반: **{student_info.get('class_name', '-')}**")
+    st.write(f"목표: **{student_info.get('learning_goal', '-')}**")
+    st.divider()
     activity_heading("📖 형식별 예제", "examples", sidebar=True)
     st.caption("예제를 누르면 현재 조립 내용이 예제로 바뀝니다.")
     for number, roles in enumerate(PATTERNS, start=1):
